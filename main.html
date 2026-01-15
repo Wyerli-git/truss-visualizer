@@ -260,6 +260,15 @@
         <small id="lenRight">Gesamtlaenge: –</small>
       </div>
 
+      <div class="form-group">
+        <label for="sideBraces">Innenstreben / Zusatzlinien</label>
+        <textarea id="sideBraces" rows="3">A-C: G300, T3D</textarea>
+        <small>
+          Format: <code>Start-Ende: Sequenz</code>, z.B. <code>A-C: G300, T3D</code>.
+          Start/Ende: A, B, C, D, AB, BC, CD, DA, O (Mitte).
+        </small>
+      </div>
+
       <small>
         Ecken musst du explizit setzen, zum Beispiel E2 vorne links, E3R oder E3L hinten mit Abgang nach unten.
         Die App zeichnet alle Teile in Reihenfolge entlang der Seite und skaliert gerade Elemente nach Laenge.
@@ -356,6 +365,7 @@
     const sideBackIn    = document.getElementById("sideBack");
     const sideLeftIn    = document.getElementById("sideLeft");
     const sideRightIn   = document.getElementById("sideRight");
+    const sideBracesIn  = document.getElementById("sideBraces");
     const svg           = document.getElementById("trussSvg");
     const materialBody  = document.getElementById("materialBody");
     const infoBtn       = document.getElementById("infoBtn");
@@ -404,7 +414,7 @@
       };
     }
 
-    function drawSide(partsCodes, start, end, materialCounts, label) {
+    function drawSide(partsCodes, start, end, materialCounts, label, options = {}) {
       if (partsCodes.length === 0) {
         return;
       }
@@ -415,7 +425,7 @@
       if (sideLenPxFull === 0) return;
 
       // Abstand zu Ecken, damit sich Bereiche nicht ueberlagern
-      const margin = 18;
+      const margin = options.margin ?? 18;
       const availLenPx = Math.max(sideLenPxFull - 2 * margin, 20);
 
       const startP = interpolate(start, end, margin / sideLenPxFull);
@@ -493,7 +503,7 @@
       const sideLabel = createSvg("text", {
         class: "svg-label",
         x: (start.x + end.x) / 2,
-        y: (start.y + end.y) / 2 + 32
+        y: (start.y + end.y) / 2 + (options.labelOffset ?? 32)
       });
       sideLabel.textContent = label;
       svg.appendChild(sideLabel);
@@ -513,6 +523,7 @@
       const seqBack  = parseSequence(sideBackIn.value);
       const seqLeft  = parseSequence(sideLeftIn.value);
       const seqRight = parseSequence(sideRightIn.value);
+      const braces = parseBraces(sideBracesIn.value);
 
       const backLen = getStraightLength(seqBack);
       const leftLen = getStraightLength(seqLeft);
@@ -530,8 +541,10 @@
       const viewW = 1000;
       const viewH = 620;
       const padding = 150;
-      const maxDim = Math.max(widthCm, depthCm);
-      const scale = (Math.min(viewW, viewH) - 2 * padding) / maxDim;
+      const scale = Math.min(
+        (viewW - 2 * padding) / widthCm,
+        (viewH - 2 * padding) / depthCm
+      );
 
       const cx = viewW / 2;
       const cy = viewH / 2;
@@ -542,6 +555,23 @@
       const B = { x: cx + halfW, y: cy + halfD }; // vorne rechts
       const C = { x: cx + halfW, y: cy - halfD }; // hinten rechts
       const D = { x: cx - halfW, y: cy - halfD }; // hinten links
+      const AB = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
+      const BC = { x: (B.x + C.x) / 2, y: (B.y + C.y) / 2 };
+      const CD = { x: (C.x + D.x) / 2, y: (C.y + D.y) / 2 };
+      const DA = { x: (D.x + A.x) / 2, y: (D.y + A.y) / 2 };
+      const O = { x: cx, y: cy };
+
+      const pointMap = {
+        A,
+        B,
+        C,
+        D,
+        AB,
+        BC,
+        CD,
+        DA,
+        O
+      };
 
       // Geisterrahmen
       const ghost = createSvg("polyline", {
@@ -595,6 +625,17 @@
       if (seqRight.length > 0) {
         drawSide(seqRight, B, C, materialCounts, "Rechts B–C");
       }
+      braces.forEach(({ start, end, seq }) => {
+        const startPoint = pointMap[start];
+        const endPoint = pointMap[end];
+        if (!startPoint || !endPoint || seq.length === 0) {
+          return;
+        }
+        drawSide(seq, startPoint, endPoint, materialCounts, `Strebe ${start}–${end}`, {
+          margin: 8,
+          labelOffset: 18
+        });
+      });
 
       // Materialtabelle
       materialBody.innerHTML = "";
