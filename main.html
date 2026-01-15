@@ -243,12 +243,6 @@
       </p>
 
       <div class="form-group">
-        <label for="sideFront">Front A–B (unten im Bild)</label>
-        <textarea id="sideFront" rows="2">E2, G200, E3R</textarea>
-        <small id="lenFront">Gesamtlaenge: –</small>
-      </div>
-
-      <div class="form-group">
         <label for="sideBack">Hinten C–D (oben im Bild)</label>
         <textarea id="sideBack" rows="2">E3L, G300, T3D, G300, T3D, G300, E3R</textarea>
         <small id="lenBack">Gesamtlaenge: –</small>
@@ -368,7 +362,6 @@
       SHORT_INDEX[p.short.toUpperCase()] = p;
     });
 
-    const sideFrontIn   = document.getElementById("sideFront");
     const sideBackIn    = document.getElementById("sideBack");
     const sideLeftIn    = document.getElementById("sideLeft");
     const sideRightIn   = document.getElementById("sideRight");
@@ -377,7 +370,6 @@
     const materialBody  = document.getElementById("materialBody");
     const infoBtn       = document.getElementById("infoBtn");
     const typeInfo      = document.getElementById("typeInfo");
-    const lenFront      = document.getElementById("lenFront");
     const lenBack       = document.getElementById("lenBack");
     const lenLeft       = document.getElementById("lenLeft");
     const lenRight      = document.getElementById("lenRight");
@@ -527,49 +519,19 @@
       }, 0);
     }
 
-    function parseBraces(text) {
-      return text
-        .split("\n")
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .map(line => {
-          const [rawEndpoints, rawSeq] = line.split(":");
-          if (!rawEndpoints || !rawSeq) {
-            return null;
-          }
-          const endpoints = rawEndpoints
-            .trim()
-            .toUpperCase()
-            .split(/\s*(?:->|–|—|-|→)\s*/);
-          if (endpoints.length !== 2) {
-            return null;
-          }
-          const seq = parseSequence(rawSeq);
-          return {
-            start: endpoints[0],
-            end: endpoints[1],
-            seq
-          };
-        })
-        .filter(Boolean);
-    }
-
     function render() {
-      const seqFront = parseSequence(sideFrontIn.value);
       const seqBack  = parseSequence(sideBackIn.value);
       const seqLeft  = parseSequence(sideLeftIn.value);
       const seqRight = parseSequence(sideRightIn.value);
       const braces = parseBraces(sideBracesIn.value);
 
-      const frontLen = getStraightLength(seqFront);
       const backLen = getStraightLength(seqBack);
       const leftLen = getStraightLength(seqLeft);
       const rightLen = getStraightLength(seqRight);
 
-      const widthCm = clamp(Math.max(frontLen, backLen, 50), 50, 5000);
+      const widthCm = clamp(Math.max(backLen, 50), 50, 5000);
       const depthCm = clamp(Math.max(leftLen, rightLen, 50), 50, 5000);
 
-      lenFront.textContent = `Gesamtlaenge: ${frontLen.toFixed(0)} cm`;
       lenBack.textContent = `Gesamtlaenge: ${backLen.toFixed(0)} cm`;
       lenLeft.textContent = `Gesamtlaenge: ${leftLen.toFixed(0)} cm`;
       lenRight.textContent = `Gesamtlaenge: ${rightLen.toFixed(0)} cm`;
@@ -657,9 +619,6 @@
       if (seqBack.length > 0) {
         drawSide(seqBack, D, C, materialCounts, "Hinten C–D");
       }
-      if (seqFront.length > 0) {
-        drawSide(seqFront, A, B, materialCounts, "Front A–B");
-      }
       if (seqLeft.length > 0) {
         drawSide(seqLeft, A, D, materialCounts, "Links A–D");
       }
@@ -698,7 +657,7 @@
       });
     }
 
-    [sideFrontIn, sideBackIn, sideLeftIn, sideRightIn, sideBracesIn].forEach(el => {
+    [sideBackIn, sideLeftIn, sideRightIn].forEach(el => {
       el.addEventListener("input", render);
     });
 
