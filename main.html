@@ -236,17 +236,22 @@
     <!-- Steuerung -->
     <div class="card">
       <h2>Rahmen Parameter</h2>
-
+      <p style="font-size:12px;">
+        Die Rahmenmasse werden automatisch aus den Bauteil-Sequenzen berechnet.
+      </p>
       <div class="form-group">
-        <label for="width">Breite (hinten, C–D) in cm</label>
-        <input id="width" type="number" min="50" max="5000" step="10" value="1700" />
-        <small>Zum Beispiel 1700 fuer 17,0 m.</small>
+        <div class="inline" style="justify-content: space-between;">
+          <span style="font-size:12px;font-weight:600;">Breite (C–D / A–B)</span>
+          <span id="widthAuto" style="font-size:12px;">–</span>
+        </div>
+        <small>Summe der geraden Elemente je Seite (max. aus Front/Hinten).</small>
       </div>
-
       <div class="form-group">
-        <label for="depth">Tiefe (links/rechts, A–D / B–C) in cm</label>
-        <input id="depth" type="number" min="50" max="5000" step="10" value="200" />
-        <small>Zum Beispiel 200 fuer 2,0 m.</small>
+        <div class="inline" style="justify-content: space-between;">
+          <span style="font-size:12px;font-weight:600;">Tiefe (A–D / B–C)</span>
+          <span id="depthAuto" style="font-size:12px;">–</span>
+        </div>
+        <small>Summe der geraden Elemente je Seite (max. aus Links/Rechts).</small>
       </div>
 
       <div class="form-group inline">
@@ -264,21 +269,25 @@
       <div class="form-group">
         <label for="sideFront">Front A–B (unten im Bild)</label>
         <textarea id="sideFront" rows="2">E2, G200, E3R</textarea>
+        <small id="lenFront">Gesamtlaenge: –</small>
       </div>
 
       <div class="form-group">
         <label for="sideBack">Hinten C–D (oben im Bild)</label>
         <textarea id="sideBack" rows="2">E3L, G300, T3D, G300, T3D, G300, E3R</textarea>
+        <small id="lenBack">Gesamtlaenge: –</small>
       </div>
 
       <div class="form-group">
         <label for="sideLeft">Links A–D</label>
         <textarea id="sideLeft" rows="2">T3D, G200</textarea>
+        <small id="lenLeft">Gesamtlaenge: –</small>
       </div>
 
       <div class="form-group">
         <label for="sideRight">Rechts B–C</label>
         <textarea id="sideRight" rows="2">G200, T3D</textarea>
+        <small id="lenRight">Gesamtlaenge: –</small>
       </div>
 
       <small>
@@ -291,7 +300,7 @@
     <div class="card">
       <div class="frame-title">
         <span>Draufsicht mit Bauteilen</span>
-        <button id="infoBtn" type="button" class="info-btn">Typen Info</button>
+        <button id="infoBtn" type="button" class="info-btn" aria-expanded="false">Typen Info</button>
       </div>
 
       <svg id="trussSvg" viewBox="0 0 1000 620" aria-label="Truss Draufsicht">
@@ -303,30 +312,30 @@
         </defs>
       </svg>
 
-      <div id="typeInfo" class="type-info">
-        <strong>Zuordnung Kurzcode zu Truss Typ</strong>
+      <div id="typeInfo" class="type-info" aria-hidden="true">
+        <strong>Bauteile und Kurzcodes</strong>
         <table>
           <thead>
             <tr>
-              <th>Kurz</th>
               <th>Original Typ</th>
               <th>Bezeichnung</th>
+              <th>Kurz</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>G29</td><td>STB290</td><td>Gerades Element 29 cm</td></tr>
-            <tr><td>G50</td><td>STB500</td><td>Gerades Element 50 cm</td></tr>
-            <tr><td>G100</td><td>STB1000</td><td>Gerades Element 100 cm</td></tr>
-            <tr><td>G200</td><td>STB2000</td><td>Gerades Element 200 cm</td></tr>
-            <tr><td>G250</td><td>STB2500</td><td>Gerades Element 250 cm</td></tr>
-            <tr><td>G300</td><td>STB3000</td><td>Gerades Element 300 cm</td></tr>
-            <tr><td>E2</td><td>ACB25</td><td>2-weg Ecke 90° Spitz innen</td></tr>
-            <tr><td>E3R</td><td>ALB33</td><td>3-weg Ecke 90° Abgang unten rechts</td></tr>
-            <tr><td>E3L</td><td>ALB34</td><td>3-weg Ecke 90° Abgang unten links</td></tr>
-            <tr><td>T3D</td><td>ATB35</td><td>3-weg T-Stueck Abgang / Fuss</td></tr>
-            <tr><td>T3H</td><td>ATB36</td><td>3-weg T-Stueck horizontal</td></tr>
-            <tr><td>T4D</td><td>ATB42</td><td>4-weg T-Stueck Abgang unten</td></tr>
-            <tr><td>BP</td><td>BBPT</td><td>Bodenplatte</td></tr>
+            <tr><td>STB290</td><td>Gerades Element 29 cm</td><td>G29</td></tr>
+            <tr><td>STB500</td><td>Gerades Element 50 cm</td><td>G50</td></tr>
+            <tr><td>STB1000</td><td>Gerades Element 100 cm</td><td>G100</td></tr>
+            <tr><td>STB2000</td><td>Gerades Element 200 cm</td><td>G200</td></tr>
+            <tr><td>STB2500</td><td>Gerades Element 250 cm</td><td>G250</td></tr>
+            <tr><td>STB3000</td><td>Gerades Element 300 cm</td><td>G300</td></tr>
+            <tr><td>ACB25</td><td>2-weg Ecke 90° Spitz innen</td><td>E2</td></tr>
+            <tr><td>ALB33</td><td>3-weg Ecke 90° Abgang unten rechts</td><td>E3R</td></tr>
+            <tr><td>ALB34</td><td>3-weg Ecke 90° Abgang unten links</td><td>E3L</td></tr>
+            <tr><td>ATB35</td><td>3-weg T-Stueck Abgang / Fuss</td><td>T3D</td></tr>
+            <tr><td>ATB36</td><td>3-weg T-Stueck horizontal</td><td>T3H</td></tr>
+            <tr><td>ATB42</td><td>4-weg T-Stueck Abgang unten</td><td>T4D</td></tr>
+            <tr><td>BBPT</td><td>Bodenplatte</td><td>BP</td></tr>
           </tbody>
         </table>
       </div>
@@ -374,8 +383,6 @@
       SHORT_INDEX[p.short.toUpperCase()] = p;
     });
 
-    const widthInput    = document.getElementById("width");
-    const depthInput    = document.getElementById("depth");
     const frontOpenIn   = document.getElementById("frontOpen");
     const sideFrontIn   = document.getElementById("sideFront");
     const sideBackIn    = document.getElementById("sideBack");
@@ -385,6 +392,12 @@
     const materialBody  = document.getElementById("materialBody");
     const infoBtn       = document.getElementById("infoBtn");
     const typeInfo      = document.getElementById("typeInfo");
+    const widthAuto     = document.getElementById("widthAuto");
+    const depthAuto     = document.getElementById("depthAuto");
+    const lenFront      = document.getElementById("lenFront");
+    const lenBack       = document.getElementById("lenBack");
+    const lenLeft       = document.getElementById("lenLeft");
+    const lenRight      = document.getElementById("lenRight");
 
     function clamp(v, min, max) {
       return Math.max(min, Math.min(max, v));
@@ -426,7 +439,7 @@
       };
     }
 
-    function drawSide(partsCodes, start, end, physicalLengthCm, materialCounts, label) {
+    function drawSide(partsCodes, start, end, materialCounts, label) {
       if (partsCodes.length === 0) {
         return;
       }
@@ -521,18 +534,38 @@
       svg.appendChild(sideLabel);
     }
 
-    function render() {
-      const widthCm = clamp(parseFloat(widthInput.value) || 300, 50, 5000);
-      const depthCm = clamp(parseFloat(depthInput.value) || 200, 50, 5000);
-      widthInput.value = widthCm;
-      depthInput.value = depthCm;
+    function getStraightLength(partsCodes) {
+      return partsCodes.reduce((total, code) => {
+        const part = PARTS[code];
+        if (!part || part.kind !== "straight") {
+          return total;
+        }
+        return total + part.lengthCm;
+      }, 0);
+    }
 
+    function render() {
       const frontOpen = frontOpenIn.checked;
 
       const seqFront = parseSequence(sideFrontIn.value);
       const seqBack  = parseSequence(sideBackIn.value);
       const seqLeft  = parseSequence(sideLeftIn.value);
       const seqRight = parseSequence(sideRightIn.value);
+
+      const frontLen = getStraightLength(seqFront);
+      const backLen = getStraightLength(seqBack);
+      const leftLen = getStraightLength(seqLeft);
+      const rightLen = getStraightLength(seqRight);
+
+      const widthCm = clamp(Math.max(frontLen, backLen, 50), 50, 5000);
+      const depthCm = clamp(Math.max(leftLen, rightLen, 50), 50, 5000);
+
+      widthAuto.textContent = `${widthCm.toFixed(0)} cm`;
+      depthAuto.textContent = `${depthCm.toFixed(0)} cm`;
+      lenFront.textContent = `Gesamtlaenge: ${frontLen.toFixed(0)} cm`;
+      lenBack.textContent = `Gesamtlaenge: ${backLen.toFixed(0)} cm`;
+      lenLeft.textContent = `Gesamtlaenge: ${leftLen.toFixed(0)} cm`;
+      lenRight.textContent = `Gesamtlaenge: ${rightLen.toFixed(0)} cm`;
 
       clearSvg();
 
@@ -596,18 +629,18 @@
       const materialCounts = {};
 
       if (seqBack.length > 0) {
-        drawSide(seqBack, D, C, widthCm, materialCounts, "Hinten C–D");
+        drawSide(seqBack, D, C, materialCounts, "Hinten C–D");
       }
       if (seqFront.length > 0 && !frontOpen) {
-        drawSide(seqFront, A, B, widthCm, materialCounts, "Front A–B");
+        drawSide(seqFront, A, B, materialCounts, "Front A–B");
       } else if (seqFront.length > 0 && frontOpen) {
-        drawSide(seqFront, A, B, widthCm, materialCounts, "Front (Bauteile, Rahmen offen)");
+        drawSide(seqFront, A, B, materialCounts, "Front (Bauteile, Rahmen offen)");
       }
       if (seqLeft.length > 0) {
-        drawSide(seqLeft, A, D, depthCm, materialCounts, "Links A–D");
+        drawSide(seqLeft, A, D, materialCounts, "Links A–D");
       }
       if (seqRight.length > 0) {
-        drawSide(seqRight, B, C, depthCm, materialCounts, "Rechts B–C");
+        drawSide(seqRight, B, C, materialCounts, "Rechts B–C");
       }
 
       // Materialtabelle
@@ -630,8 +663,6 @@
       });
     }
 
-    widthInput.addEventListener("input", render);
-    depthInput.addEventListener("input", render);
     frontOpenIn.addEventListener("change", render);
     [sideFrontIn, sideBackIn, sideLeftIn, sideRightIn].forEach(el => {
       el.addEventListener("input", render);
@@ -642,6 +673,8 @@
     infoBtn.addEventListener("click", () => {
       const visible = typeInfo.style.display === "block";
       typeInfo.style.display = visible ? "none" : "block";
+      typeInfo.setAttribute("aria-hidden", visible ? "true" : "false");
+      infoBtn.setAttribute("aria-expanded", visible ? "false" : "true");
     });
   </script>
 </body>
