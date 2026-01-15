@@ -235,42 +235,12 @@
   <div class="layout">
     <!-- Steuerung -->
     <div class="card">
-      <h2>Rahmen Parameter</h2>
-      <p style="font-size:12px;">
-        Die Rahmenmasse werden automatisch aus den Bauteil-Sequenzen berechnet.
-      </p>
-      <div class="form-group">
-        <div class="inline" style="justify-content: space-between;">
-          <span style="font-size:12px;font-weight:600;">Breite (C–D / A–B)</span>
-          <span id="widthAuto" style="font-size:12px;">–</span>
-        </div>
-        <small>Summe der geraden Elemente je Seite (max. aus Front/Hinten).</small>
-      </div>
-      <div class="form-group">
-        <div class="inline" style="justify-content: space-between;">
-          <span style="font-size:12px;font-weight:600;">Tiefe (A–D / B–C)</span>
-          <span id="depthAuto" style="font-size:12px;">–</span>
-        </div>
-        <small>Summe der geraden Elemente je Seite (max. aus Links/Rechts).</small>
-      </div>
-
-      <div class="form-group inline">
-        <input id="frontOpen" type="checkbox" checked />
-        <label for="frontOpen" style="margin-bottom:0;">Front A–B offen (typisch Barseite)</label>
-      </div>
-
       <h2>Bauteil Sequenzen je Seite</h2>
       <p style="font-size:11px;">
         Erlaubte Kurzcodes: G29, G50, G100, G200, G250, G300,
         E2, E3R, E3L, T3D, T3H, T4D, BP.  
         Beispiel: <code>E3L, G300, T3D, G300, T3D, G300, E3R</code>
       </p>
-
-      <div class="form-group">
-        <label for="sideFront">Front A–B (unten im Bild)</label>
-        <textarea id="sideFront" rows="2">E2, G200, E3R</textarea>
-        <small id="lenFront">Gesamtlaenge: –</small>
-      </div>
 
       <div class="form-group">
         <label for="sideBack">Hinten C–D (oben im Bild)</label>
@@ -383,8 +353,6 @@
       SHORT_INDEX[p.short.toUpperCase()] = p;
     });
 
-    const frontOpenIn   = document.getElementById("frontOpen");
-    const sideFrontIn   = document.getElementById("sideFront");
     const sideBackIn    = document.getElementById("sideBack");
     const sideLeftIn    = document.getElementById("sideLeft");
     const sideRightIn   = document.getElementById("sideRight");
@@ -392,9 +360,6 @@
     const materialBody  = document.getElementById("materialBody");
     const infoBtn       = document.getElementById("infoBtn");
     const typeInfo      = document.getElementById("typeInfo");
-    const widthAuto     = document.getElementById("widthAuto");
-    const depthAuto     = document.getElementById("depthAuto");
-    const lenFront      = document.getElementById("lenFront");
     const lenBack       = document.getElementById("lenBack");
     const lenLeft       = document.getElementById("lenLeft");
     const lenRight      = document.getElementById("lenRight");
@@ -545,24 +510,17 @@
     }
 
     function render() {
-      const frontOpen = frontOpenIn.checked;
-
-      const seqFront = parseSequence(sideFrontIn.value);
       const seqBack  = parseSequence(sideBackIn.value);
       const seqLeft  = parseSequence(sideLeftIn.value);
       const seqRight = parseSequence(sideRightIn.value);
 
-      const frontLen = getStraightLength(seqFront);
       const backLen = getStraightLength(seqBack);
       const leftLen = getStraightLength(seqLeft);
       const rightLen = getStraightLength(seqRight);
 
-      const widthCm = clamp(Math.max(frontLen, backLen, 50), 50, 5000);
+      const widthCm = clamp(Math.max(backLen, 50), 50, 5000);
       const depthCm = clamp(Math.max(leftLen, rightLen, 50), 50, 5000);
 
-      widthAuto.textContent = `${widthCm.toFixed(0)} cm`;
-      depthAuto.textContent = `${depthCm.toFixed(0)} cm`;
-      lenFront.textContent = `Gesamtlaenge: ${frontLen.toFixed(0)} cm`;
       lenBack.textContent = `Gesamtlaenge: ${backLen.toFixed(0)} cm`;
       lenLeft.textContent = `Gesamtlaenge: ${leftLen.toFixed(0)} cm`;
       lenRight.textContent = `Gesamtlaenge: ${rightLen.toFixed(0)} cm`;
@@ -631,11 +589,6 @@
       if (seqBack.length > 0) {
         drawSide(seqBack, D, C, materialCounts, "Hinten C–D");
       }
-      if (seqFront.length > 0 && !frontOpen) {
-        drawSide(seqFront, A, B, materialCounts, "Front A–B");
-      } else if (seqFront.length > 0 && frontOpen) {
-        drawSide(seqFront, A, B, materialCounts, "Front (Bauteile, Rahmen offen)");
-      }
       if (seqLeft.length > 0) {
         drawSide(seqLeft, A, D, materialCounts, "Links A–D");
       }
@@ -663,8 +616,7 @@
       });
     }
 
-    frontOpenIn.addEventListener("change", render);
-    [sideFrontIn, sideBackIn, sideLeftIn, sideRightIn].forEach(el => {
+    [sideBackIn, sideLeftIn, sideRightIn].forEach(el => {
       el.addEventListener("input", render);
     });
 
