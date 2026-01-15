@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Truss Konfigurator Advanced – MILOS M290 Trio T</title>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --card-bg: #ffffff;
+      --border: #cccccc;
+      --accent: #005bbb;
+      --text: #222222;
+      --muted: #666666;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    h1 {
+      margin: 0 0 4px 0;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    h2 {
+      margin: 16px 0 8px 0;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0 0 8px 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 13px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      resize: vertical;
+    }
+
+    small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 6px;
+    }
+
+    button.info-btn {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--accent);
+      background: #e6f0ff;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    button.info-btn:hover {
+      background: #d4e4ff;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .frame-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .material-list {
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .material-list table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .material-list th,
+    .material-list td {
+      border: 1px solid #ddd;
+      padding: 4px 6px;
+      text-align: left;
+    }
+
+    .material-list th {
+      background: #f0f0f0;
+      font-weight: 600;
+    }
+
+    .svg-muted {
+      stroke: #d0d0d0;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .seg-rect {
+      fill: #ffffff;
+      stroke: #000000;
+      stroke-width: 1.5;
+    }
+
+    .seg-connector {
+      fill: #e6f0ff;
+    }
+
+    .seg-straight {
+      fill: #ffffff;
+    }
+
+    .seg-text {
+      font-size: 9px;
+      fill: #111111;
+      dominant-baseline: middle;
+      text-anchor: middle;
+      user-select: none;
+    }
+
+    .svg-dim {
+      stroke: #888888;
+      fill: none;
+      stroke-width: 1;
+      marker-end: url(#arrowhead);
+      marker-start: url(#arrowhead);
+    }
+
+    .svg-label {
+      font-size: 11px;
+      fill: #111111;
+      user-select: none;
+    }
+
+    .type-info {
+      margin-top: 8px;
+      font-size: 11px;
+      border-radius: 6px;
+      border: 1px solid #dde3f0;
+      background: #f5f7ff;
+      padding: 8px;
+      display: none;
+    }
+
+    .type-info table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .type-info th,
+    .type-info td {
+      border: 1px solid #d0d5e5;
+      padding: 3px 5px;
+      text-align: left;
+    }
+
+    .type-info th {
+      background: #e4e8fb;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Truss Konfigurator Advanced – MILOS M290 Trio T</h1>
+  <p>
+    Rechteckiger Rahmen in Draufsicht. Jede Seite erhaelt eine eigene Sequenz an Truss-Elementen.
+    Du arbeitest ausschliesslich mit Kurzcodes wie G300, E3L, T3D, BP.
+  </p>
+
+  <div class="layout">
+    <!-- Steuerung -->
+    <div class="card">
+      <h2>Rahmen Parameter</h2>
+
+      <div class="form-group">
+        <label for="width">Breite (hinten, C–D) in cm</label>
+        <input id="width" type="number" min="50" max="5000" step="10" value="1700" />
+        <small>Zum Beispiel 1700 fuer 17,0 m.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="depth">Tiefe (links/rechts, A–D / B–C) in cm</label>
+        <input id="depth" type="number" min="50" max="5000" step="10" value="200" />
+        <small>Zum Beispiel 200 fuer 2,0 m.</small>
+      </div>
+
+      <div class="form-group inline">
+        <input id="frontOpen" type="checkbox" checked />
+        <label for="frontOpen" style="margin-bottom:0;">Front A–B offen (typisch Barseite)</label>
+      </div>
+
+      <h2>Bauteil Sequenzen je Seite</h2>
+      <p style="font-size:11px;">
+        Erlaubte Kurzcodes: G29, G50, G100, G200, G250, G300,
+        E2, E3R, E3L, T3D, T3H, T4D, BP.  
+        Beispiel: <code>E3L, G300, T3D, G300, T3D, G300, E3R</code>
+      </p>
+
+      <div class="form-group">
+        <label for="sideFront">Front A–B (unten im Bild)</label>
+        <textarea id="sideFront" rows="2">E2, G200, E3R</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="sideBack">Hinten C–D (oben im Bild)</label>
+        <textarea id="sideBack" rows="2">E3L, G300, T3D, G300, T3D, G300, E3R</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="sideLeft">Links A–D</label>
+        <textarea id="sideLeft" rows="2">T3D, G200</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="sideRight">Rechts B–C</label>
+        <textarea id="sideRight" rows="2">G200, T3D</textarea>
+      </div>
+
+      <small>
+        Ecken musst du explizit setzen, zum Beispiel E2 vorne links, E3R oder E3L hinten mit Abgang nach unten.
+        Die App zeichnet alle Teile in Reihenfolge entlang der Seite und skaliert gerade Elemente nach Laenge.
+      </small>
+    </div>
+
+    <!-- Visualisierung und Material -->
+    <div class="card">
+      <div class="frame-title">
+        <span>Draufsicht mit Bauteilen</span>
+        <button id="infoBtn" type="button" class="info-btn">Typen Info</button>
+      </div>
+
+      <svg id="trussSvg" viewBox="0 0 1000 620" aria-label="Truss Draufsicht">
+        <defs>
+          <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3"
+                  orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L6,3 L0,6 z" fill="#888888" />
+          </marker>
+        </defs>
+      </svg>
+
+      <div id="typeInfo" class="type-info">
+        <strong>Zuordnung Kurzcode zu Truss Typ</strong>
+        <table>
+          <thead>
+            <tr>
+              <th>Kurz</th>
+              <th>Original Typ</th>
+              <th>Bezeichnung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>G29</td><td>STB290</td><td>Gerades Element 29 cm</td></tr>
+            <tr><td>G50</td><td>STB500</td><td>Gerades Element 50 cm</td></tr>
+            <tr><td>G100</td><td>STB1000</td><td>Gerades Element 100 cm</td></tr>
+            <tr><td>G200</td><td>STB2000</td><td>Gerades Element 200 cm</td></tr>
+            <tr><td>G250</td><td>STB2500</td><td>Gerades Element 250 cm</td></tr>
+            <tr><td>G300</td><td>STB3000</td><td>Gerades Element 300 cm</td></tr>
+            <tr><td>E2</td><td>ACB25</td><td>2-weg Ecke 90° Spitz innen</td></tr>
+            <tr><td>E3R</td><td>ALB33</td><td>3-weg Ecke 90° Abgang unten rechts</td></tr>
+            <tr><td>E3L</td><td>ALB34</td><td>3-weg Ecke 90° Abgang unten links</td></tr>
+            <tr><td>T3D</td><td>ATB35</td><td>3-weg T-Stueck Abgang / Fuss</td></tr>
+            <tr><td>T3H</td><td>ATB36</td><td>3-weg T-Stueck horizontal</td></tr>
+            <tr><td>T4D</td><td>ATB42</td><td>4-weg T-Stueck Abgang unten</td></tr>
+            <tr><td>BP</td><td>BBPT</td><td>Bodenplatte</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="material-list">
+        <strong>Material Uebersicht</strong>
+        <table>
+          <thead>
+            <tr>
+              <th>Kurz</th>
+              <th>Anzahl</th>
+              <th>Bezeichnung</th>
+            </tr>
+          </thead>
+          <tbody id="materialBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Bauteil Definitionen mit Kurzlabel
+    const PARTS = {
+      STB290:  { code: "STB290",  short: "G29",  name: "Gerades Element 29 cm",  lengthCm: 29,  kind: "straight" },
+      STB500:  { code: "STB500",  short: "G50",  name: "Gerades Element 50 cm",  lengthCm: 50,  kind: "straight" },
+      STB1000: { code: "STB1000", short: "G100", name: "Gerades Element 100 cm", lengthCm: 100, kind: "straight" },
+      STB2000: { code: "STB2000", short: "G200", name: "Gerades Element 200 cm", lengthCm: 200, kind: "straight" },
+      STB2500: { code: "STB2500", short: "G250", name: "Gerades Element 250 cm", lengthCm: 250, kind: "straight" },
+      STB3000: { code: "STB3000", short: "G300", name: "Gerades Element 300 cm", lengthCm: 300, kind: "straight" },
+
+      ACB25:   { code: "ACB25",  short: "E2",   name: "2-weg Ecke 90° Spitz innen",           lengthCm: 0, kind: "corner2" },
+      ALB33:   { code: "ALB33",  short: "E3R",  name: "3-weg Ecke 90° Abgang unten rechts",   lengthCm: 0, kind: "corner3" },
+      ALB34:   { code: "ALB34",  short: "E3L",  name: "3-weg Ecke 90° Abgang unten links",    lengthCm: 0, kind: "corner3" },
+
+      ATB35:   { code: "ATB35",  short: "T3D",  name: "3-weg T-Stueck Abgang / Fuss",         lengthCm: 0, kind: "t-down" },
+      ATB36:   { code: "ATB36",  short: "T3H",  name: "3-weg T-Stueck horizontal",            lengthCm: 0, kind: "t-horiz" },
+      ATB42:   { code: "ATB42",  short: "T4D",  name: "4-weg T-Stueck Abgang unten",          lengthCm: 0, kind: "t4-down" },
+
+      BBPT:    { code: "BBPT",   short: "BP",   name: "Bodenplatte",                          lengthCm: 0, kind: "base" }
+    };
+
+    // Mapping Kurzcode -> Part
+    const SHORT_INDEX = {};
+    Object.values(PARTS).forEach(p => {
+      SHORT_INDEX[p.short.toUpperCase()] = p;
+    });
+
+    const widthInput    = document.getElementById("width");
+    const depthInput    = document.getElementById("depth");
+    const frontOpenIn   = document.getElementById("frontOpen");
+    const sideFrontIn   = document.getElementById("sideFront");
+    const sideBackIn    = document.getElementById("sideBack");
+    const sideLeftIn    = document.getElementById("sideLeft");
+    const sideRightIn   = document.getElementById("sideRight");
+    const svg           = document.getElementById("trussSvg");
+    const materialBody  = document.getElementById("materialBody");
+    const infoBtn       = document.getElementById("infoBtn");
+    const typeInfo      = document.getElementById("typeInfo");
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function clearSvg() {
+      while (svg.lastChild && svg.lastChild.nodeName !== "defs") {
+        svg.removeChild(svg.lastChild);
+      }
+    }
+
+    function createSvg(tag, attrs) {
+      const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        el.setAttribute(k, v);
+      }
+      return el;
+    }
+
+    function parseSequence(text) {
+      return text
+        .split(",")
+        .map(t => t.trim().toUpperCase())
+        .filter(t => t.length > 0)
+        .map(token => {
+          // zuerst nach Kurzcode suchen
+          if (SHORT_INDEX[token]) return SHORT_INDEX[token].code;
+          // falls jemand doch Originalcode eingibt, auch akzeptieren
+          if (PARTS[token]) return token;
+          return null;
+        })
+        .filter(Boolean);
+    }
+
+    function interpolate(p1, p2, t) {
+      return {
+        x: p1.x + (p2.x - p1.x) * t,
+        y: p1.y + (p2.y - p1.y) * t
+      };
+    }
+
+    function drawSide(partsCodes, start, end, physicalLengthCm, materialCounts, label) {
+      if (partsCodes.length === 0) {
+        return;
+      }
+
+      const dxFull = end.x - start.x;
+      const dyFull = end.y - start.y;
+      const sideLenPxFull = Math.sqrt(dxFull * dxFull + dyFull * dyFull);
+      if (sideLenPxFull === 0) return;
+
+      // Abstand zu Ecken, damit sich Bereiche nicht ueberlagern
+      const margin = 18;
+      const availLenPx = Math.max(sideLenPxFull - 2 * margin, 20);
+
+      const startP = interpolate(start, end, margin / sideLenPxFull);
+      const endP   = interpolate(start, end, 1 - margin / sideLenPxFull);
+
+      const dx = endP.x - startP.x;
+      const dy = endP.y - startP.y;
+      const sideLenPx = Math.sqrt(dx * dx + dy * dy);
+
+      const ux = dx / sideLenPx;
+      const uy = dy / sideLenPx;
+
+      const px = -uy;
+      const py = ux;
+
+      const height = 24;
+
+      // Laenge fuer gerade Elemente
+      let straightLenCm = 0;
+      partsCodes.forEach(code => {
+        const p = PARTS[code];
+        if (p && p.kind === "straight") {
+          straightLenCm += p.lengthCm;
+        }
+      });
+
+      const connectorCount = partsCodes.filter(c => PARTS[c] && PARTS[c].kind !== "straight").length;
+      const minConnectorPx = 38;
+      const remainingPx = Math.max(availLenPx - connectorCount * minConnectorPx, 10);
+      const scale = straightLenCm > 0 ? remainingPx / straightLenCm : 0;
+
+      let pos = { x: startP.x, y: startP.y };
+
+      partsCodes.forEach(code => {
+        const part = PARTS[code];
+        if (!part) return;
+        materialCounts[code] = (materialCounts[code] || 0) + 1;
+
+        let segPx = 0;
+        if (part.kind === "straight") {
+          segPx = part.lengthCm * Math.max(scale, 0.1);
+        } else {
+          segPx = minConnectorPx;
+        }
+
+        const next = { x: pos.x + ux * segPx, y: pos.y + uy * segPx };
+
+        const hx = (px * height) / 2;
+        const hy = (py * height) / 2;
+
+        const p0 = { x: pos.x + hx,  y: pos.y + hy };
+        const p1 = { x: pos.x - hx,  y: pos.y - hy };
+        const p2 = { x: next.x - hx, y: next.y - hy };
+        const p3 = { x: next.x + hx, y: next.y + hy };
+
+        const polygon = createSvg("polygon", {
+          class: "seg-rect " + (part.kind === "straight" ? "seg-straight" : "seg-connector"),
+          points: `${p0.x},${p0.y} ${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`
+        });
+        svg.appendChild(polygon);
+
+        const center = { x: (pos.x + next.x) / 2, y: (pos.y + next.y) / 2 };
+
+        const text = createSvg("text", {
+          class: "seg-text",
+          x: center.x,
+          y: center.y
+        });
+        text.textContent = part.short || part.code;
+        svg.appendChild(text);
+
+        pos = next;
+      });
+
+      const sideLabel = createSvg("text", {
+        class: "svg-label",
+        x: (start.x + end.x) / 2,
+        y: (start.y + end.y) / 2 + 32
+      });
+      sideLabel.textContent = label;
+      svg.appendChild(sideLabel);
+    }
+
+    function render() {
+      const widthCm = clamp(parseFloat(widthInput.value) || 300, 50, 5000);
+      const depthCm = clamp(parseFloat(depthInput.value) || 200, 50, 5000);
+      widthInput.value = widthCm;
+      depthInput.value = depthCm;
+
+      const frontOpen = frontOpenIn.checked;
+
+      const seqFront = parseSequence(sideFrontIn.value);
+      const seqBack  = parseSequence(sideBackIn.value);
+      const seqLeft  = parseSequence(sideLeftIn.value);
+      const seqRight = parseSequence(sideRightIn.value);
+
+      clearSvg();
+
+      const viewW = 1000;
+      const viewH = 620;
+      const padding = 150;
+      const maxDim = Math.max(widthCm, depthCm);
+      const scale = (Math.min(viewW, viewH) - 2 * padding) / maxDim;
+
+      const cx = viewW / 2;
+      const cy = viewH / 2;
+      const halfW = (widthCm * scale) / 2;
+      const halfD = (depthCm * scale) / 2;
+
+      const A = { x: cx - halfW, y: cy + halfD }; // vorne links
+      const B = { x: cx + halfW, y: cy + halfD }; // vorne rechts
+      const C = { x: cx + halfW, y: cy - halfD }; // hinten rechts
+      const D = { x: cx - halfW, y: cy - halfD }; // hinten links
+
+      // Geisterrahmen
+      const ghost = createSvg("polyline", {
+        class: "svg-muted",
+        points: `${D.x},${D.y} ${C.x},${C.y} ${B.x},${B.y} ${A.x},${A.y} ${D.x},${D.y}`
+      });
+      svg.appendChild(ghost);
+
+      // Dimensionen
+      const dimBack = createSvg("line", {
+        class: "svg-dim",
+        x1: D.x, y1: D.y - 40,
+        x2: C.x, y2: C.y - 40
+      });
+      svg.appendChild(dimBack);
+
+      const textBack = createSvg("text", {
+        class: "svg-label",
+        x: cx,
+        y: D.y - 52,
+        "text-anchor": "middle"
+      });
+      textBack.textContent = `Breite: ${widthCm.toFixed(0)} cm`;
+      svg.appendChild(textBack);
+
+      const dimLeft = createSvg("line", {
+        class: "svg-dim",
+        x1: A.x - 40, y1: A.y,
+        x2: D.x - 40, y2: D.y
+      });
+      svg.appendChild(dimLeft);
+
+      const textLeft = createSvg("text", {
+        class: "svg-label",
+        x: A.x - 52,
+        y: cy,
+        transform: `rotate(-90 ${A.x - 52} ${cy})`,
+        "text-anchor": "middle"
+      });
+      textLeft.textContent = `Tiefe: ${depthCm.toFixed(0)} cm`;
+      svg.appendChild(textLeft);
+
+      const materialCounts = {};
+
+      if (seqBack.length > 0) {
+        drawSide(seqBack, D, C, widthCm, materialCounts, "Hinten C–D");
+      }
+      if (seqFront.length > 0 && !frontOpen) {
+        drawSide(seqFront, A, B, widthCm, materialCounts, "Front A–B");
+      } else if (seqFront.length > 0 && frontOpen) {
+        drawSide(seqFront, A, B, widthCm, materialCounts, "Front (Bauteile, Rahmen offen)");
+      }
+      if (seqLeft.length > 0) {
+        drawSide(seqLeft, A, D, depthCm, materialCounts, "Links A–D");
+      }
+      if (seqRight.length > 0) {
+        drawSide(seqRight, B, C, depthCm, materialCounts, "Rechts B–C");
+      }
+
+      // Materialtabelle
+      materialBody.innerHTML = "";
+      const codes = Object.keys(materialCounts).sort();
+      codes.forEach(code => {
+        const part = PARTS[code];
+        if (!part) return;
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td");
+        const td2 = document.createElement("td");
+        const td3 = document.createElement("td");
+        td1.textContent = part.short || code;
+        td2.textContent = materialCounts[code];
+        td3.textContent = part.name;
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        materialBody.appendChild(tr);
+      });
+    }
+
+    widthInput.addEventListener("input", render);
+    depthInput.addEventListener("input", render);
+    frontOpenIn.addEventListener("change", render);
+    [sideFrontIn, sideBackIn, sideLeftIn, sideRightIn].forEach(el => {
+      el.addEventListener("input", render);
+    });
+
+    document.addEventListener("DOMContentLoaded", render);
+
+    infoBtn.addEventListener("click", () => {
+      const visible = typeInfo.style.display === "block";
+      typeInfo.style.display = visible ? "none" : "block";
+    });
+  </script>
+</body>
+</html>
