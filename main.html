@@ -235,30 +235,6 @@
   <div class="layout">
     <!-- Steuerung -->
     <div class="card">
-      <h2>Rahmen Parameter</h2>
-      <p style="font-size:12px;">
-        Die Rahmenmasse werden automatisch aus den Bauteil-Sequenzen berechnet.
-      </p>
-      <div class="form-group">
-        <div class="inline" style="justify-content: space-between;">
-          <span style="font-size:12px;font-weight:600;">Breite (C–D / A–B)</span>
-          <span id="widthAuto" style="font-size:12px;">–</span>
-        </div>
-        <small>Summe der geraden Elemente je Seite (max. aus Front/Hinten).</small>
-      </div>
-      <div class="form-group">
-        <div class="inline" style="justify-content: space-between;">
-          <span style="font-size:12px;font-weight:600;">Tiefe (A–D / B–C)</span>
-          <span id="depthAuto" style="font-size:12px;">–</span>
-        </div>
-        <small>Summe der geraden Elemente je Seite (max. aus Links/Rechts).</small>
-      </div>
-
-      <div class="form-group inline">
-        <input id="frontOpen" type="checkbox" checked />
-        <label for="frontOpen" style="margin-bottom:0;">Front A–B offen (typisch Barseite)</label>
-      </div>
-
       <h2>Bauteil Sequenzen je Seite</h2>
       <p style="font-size:11px;">
         Erlaubte Kurzcodes: G29, G50, G100, G200, G250, G300,
@@ -288,6 +264,15 @@
         <label for="sideRight">Rechts B–C</label>
         <textarea id="sideRight" rows="2">G200, T3D</textarea>
         <small id="lenRight">Gesamtlaenge: –</small>
+      </div>
+
+      <div class="form-group">
+        <label for="sideBraces">Innenstreben / Zusatzlinien</label>
+        <textarea id="sideBraces" rows="3">A-C: G300, T3D</textarea>
+        <small>
+          Format: <code>Start-Ende: Sequenz</code>, z.B. <code>A-C: G300, T3D</code>.
+          Start/Ende: A, B, C, D, AB, BC, CD, DA, O (Mitte).
+        </small>
       </div>
 
       <small>
@@ -383,17 +368,15 @@
       SHORT_INDEX[p.short.toUpperCase()] = p;
     });
 
-    const frontOpenIn   = document.getElementById("frontOpen");
     const sideFrontIn   = document.getElementById("sideFront");
     const sideBackIn    = document.getElementById("sideBack");
     const sideLeftIn    = document.getElementById("sideLeft");
     const sideRightIn   = document.getElementById("sideRight");
+    const sideBracesIn  = document.getElementById("sideBraces");
     const svg           = document.getElementById("trussSvg");
     const materialBody  = document.getElementById("materialBody");
     const infoBtn       = document.getElementById("infoBtn");
     const typeInfo      = document.getElementById("typeInfo");
-    const widthAuto     = document.getElementById("widthAuto");
-    const depthAuto     = document.getElementById("depthAuto");
     const lenFront      = document.getElementById("lenFront");
     const lenBack       = document.getElementById("lenBack");
     const lenLeft       = document.getElementById("lenLeft");
@@ -439,7 +422,7 @@
       };
     }
 
-    function drawSide(partsCodes, start, end, materialCounts, label) {
+    function drawSide(partsCodes, start, end, materialCounts, label, options = {}) {
       if (partsCodes.length === 0) {
         return;
       }
@@ -450,7 +433,7 @@
       if (sideLenPxFull === 0) return;
 
       // Abstand zu Ecken, damit sich Bereiche nicht ueberlagern
-      const margin = 18;
+      const margin = options.margin ?? 18;
       const availLenPx = Math.max(sideLenPxFull - 2 * margin, 20);
 
       const startP = interpolate(start, end, margin / sideLenPxFull);
@@ -528,7 +511,7 @@
       const sideLabel = createSvg("text", {
         class: "svg-label",
         x: (start.x + end.x) / 2,
-        y: (start.y + end.y) / 2 + 32
+        y: (start.y + end.y) / 2 + (options.labelOffset ?? 32)
       });
       sideLabel.textContent = label;
       svg.appendChild(sideLabel);
@@ -544,13 +527,39 @@
       }, 0);
     }
 
-    function render() {
-      const frontOpen = frontOpenIn.checked;
+    function parseBraces(text) {
+      return text
+        .split("\n")
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => {
+          const [rawEndpoints, rawSeq] = line.split(":");
+          if (!rawEndpoints || !rawSeq) {
+            return null;
+          }
+          const endpoints = rawEndpoints
+            .trim()
+            .toUpperCase()
+            .split(/\s*(?:->|–|—|-|→)\s*/);
+          if (endpoints.length !== 2) {
+            return null;
+          }
+          const seq = parseSequence(rawSeq);
+          return {
+            start: endpoints[0],
+            end: endpoints[1],
+            seq
+          };
+        })
+        .filter(Boolean);
+    }
 
+    function render() {
       const seqFront = parseSequence(sideFrontIn.value);
       const seqBack  = parseSequence(sideBackIn.value);
       const seqLeft  = parseSequence(sideLeftIn.value);
       const seqRight = parseSequence(sideRightIn.value);
+      const braces = parseBraces(sideBracesIn.value);
 
       const frontLen = getStraightLength(seqFront);
       const backLen = getStraightLength(seqBack);
@@ -560,8 +569,6 @@
       const widthCm = clamp(Math.max(frontLen, backLen, 50), 50, 5000);
       const depthCm = clamp(Math.max(leftLen, rightLen, 50), 50, 5000);
 
-      widthAuto.textContent = `${widthCm.toFixed(0)} cm`;
-      depthAuto.textContent = `${depthCm.toFixed(0)} cm`;
       lenFront.textContent = `Gesamtlaenge: ${frontLen.toFixed(0)} cm`;
       lenBack.textContent = `Gesamtlaenge: ${backLen.toFixed(0)} cm`;
       lenLeft.textContent = `Gesamtlaenge: ${leftLen.toFixed(0)} cm`;
@@ -572,8 +579,10 @@
       const viewW = 1000;
       const viewH = 620;
       const padding = 150;
-      const maxDim = Math.max(widthCm, depthCm);
-      const scale = (Math.min(viewW, viewH) - 2 * padding) / maxDim;
+      const scale = Math.min(
+        (viewW - 2 * padding) / widthCm,
+        (viewH - 2 * padding) / depthCm
+      );
 
       const cx = viewW / 2;
       const cy = viewH / 2;
@@ -584,6 +593,23 @@
       const B = { x: cx + halfW, y: cy + halfD }; // vorne rechts
       const C = { x: cx + halfW, y: cy - halfD }; // hinten rechts
       const D = { x: cx - halfW, y: cy - halfD }; // hinten links
+      const AB = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
+      const BC = { x: (B.x + C.x) / 2, y: (B.y + C.y) / 2 };
+      const CD = { x: (C.x + D.x) / 2, y: (C.y + D.y) / 2 };
+      const DA = { x: (D.x + A.x) / 2, y: (D.y + A.y) / 2 };
+      const O = { x: cx, y: cy };
+
+      const pointMap = {
+        A,
+        B,
+        C,
+        D,
+        AB,
+        BC,
+        CD,
+        DA,
+        O
+      };
 
       // Geisterrahmen
       const ghost = createSvg("polyline", {
@@ -631,10 +657,8 @@
       if (seqBack.length > 0) {
         drawSide(seqBack, D, C, materialCounts, "Hinten C–D");
       }
-      if (seqFront.length > 0 && !frontOpen) {
+      if (seqFront.length > 0) {
         drawSide(seqFront, A, B, materialCounts, "Front A–B");
-      } else if (seqFront.length > 0 && frontOpen) {
-        drawSide(seqFront, A, B, materialCounts, "Front (Bauteile, Rahmen offen)");
       }
       if (seqLeft.length > 0) {
         drawSide(seqLeft, A, D, materialCounts, "Links A–D");
@@ -642,6 +666,17 @@
       if (seqRight.length > 0) {
         drawSide(seqRight, B, C, materialCounts, "Rechts B–C");
       }
+      braces.forEach(({ start, end, seq }) => {
+        const startPoint = pointMap[start];
+        const endPoint = pointMap[end];
+        if (!startPoint || !endPoint || seq.length === 0) {
+          return;
+        }
+        drawSide(seq, startPoint, endPoint, materialCounts, `Strebe ${start}–${end}`, {
+          margin: 8,
+          labelOffset: 18
+        });
+      });
 
       // Materialtabelle
       materialBody.innerHTML = "";
@@ -663,8 +698,7 @@
       });
     }
 
-    frontOpenIn.addEventListener("change", render);
-    [sideFrontIn, sideBackIn, sideLeftIn, sideRightIn].forEach(el => {
+    [sideFrontIn, sideBackIn, sideLeftIn, sideRightIn, sideBracesIn].forEach(el => {
       el.addEventListener("input", render);
     });
 
